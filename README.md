@@ -4,6 +4,7 @@ Desenvolvimento de uma banca de testes para cumprimento com capítulo 16 da DO16
 Professores:
 
 Glauco Augusto de Paula Caurin
+
 Daniel Varela Magalhães
 
 Aluno:
