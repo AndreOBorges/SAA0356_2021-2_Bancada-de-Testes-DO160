@@ -5,14 +5,13 @@
 #include <Wire.h>
 
 LiquidCrystal_I2C lcd(0x27, 20, 4);
-bool left, right, up, down; //bool dos botões, quando recebe input ele vira 1
-bool haveInput = false; //quando algum dos botóes da positivo, esse bool vai pra positivo, permitindo que uma nova impressão de menus seja feita, já com a atualização do input
+//bool left, right, up, down; //bool dos botões, quando recebe input ele vira 1
 bool printContent = false; //dentro das funções, o conteúdo apresentado vai ser diferente dos menus. Avaliar se não é o caso de usar inFunction ao invés de printContent
 bool inFunction = false; //variável que vai para true assim que uma função começa a ser executada. É responsabilidade da função receber o input "left" e colocar o inFunction em false
 String specificContent[4]; //quando entra em uma função, o testo printado não são os menus, e por isso é necessário que a função preencha o que deve ser printado na tela
 
 void LCDPrint();
-void userInput();
+//void userInput();
 //class Function;
 
 /*
@@ -136,8 +135,8 @@ void setup() {
 
 void loop() {
   if (!inFunction) {
-    userInput();  
-    if(haveInput)
+    mm.userInput();  
+    if(mm.getHaveInput())
     {
       LCDPrint();
     }
@@ -172,7 +171,7 @@ void LCDPrint() {
       lcd.print(mm.getCurrentDisplay(i));
     }
   }
-  haveInput = false;
+  mm.setHaveInput(false);
   delay(500);
 }
 
@@ -182,13 +181,10 @@ void infoDisplay() {
   if (mm.getCurrentMenu()->getProgramCounter() == 0) {
     delay(500);
     mm.getCurrentMenu()->addProgramCounter();
-    up = 0;
-    down = 0;
-    left = 0;     
-    right = 0;
+    mm.zeroInputs();
     }
   
-  if (!left) {
+  if (!mm.checkLeft()) {
     specificContent[0] = "";
     specificContent[1] = "  Information menu";
     specificContent[2] = "     V1.0  beta";
@@ -200,11 +196,11 @@ void infoDisplay() {
     mm.getCurrentMenu()->setProgramCounter(0);
     LCDPrint();    
   }
-  if (haveInput) {
+  if (mm.getHaveInput()) {
     LCDPrint();
     LCDPrint();
   }
-  userInput();
+  mm.userInput();
 }
   
 
@@ -240,28 +236,21 @@ void test16611() {
       specificContent[3] = " PRESS LEFT TO STOP";
   }
   }
-  if (haveInput) {
+  if (mm.getHaveInput()) {
     LCDPrint();
   }
-  /*
-  if (programCounter == 0) {
-    delay(500);
-    programCounter++;
-    }*/
+
   if (mm.getCurrentMenu()->getProgramCounter() == 0) {
     delay(500);
     mm.getCurrentMenu()->addProgramCounter();
     mm.getCurrentMenu()->setFuncStage(0);
    
-    up = 0;
-    down = 0;
-    left = 0;     
-    right = 0;
+    mm.zeroInputs();
     }  
     
-  userInput();
+  mm.userInput();
   
-  if (left == 1) {
+  if (mm.checkLeft() == 1) {
     if (mm.getCurrentMenu()->getFuncStage() == 0 /*|| mm.getCurrentMenu()->getFuncStage() == 2*/) {
       mm.getCurrentMenu()->subFuncStage();
       mm.getCurrentMenu()->setProgramCounter(0);      
@@ -273,88 +262,13 @@ void test16611() {
       mm.getCurrentMenu()->subFuncStage();
     }
   }
-  else if (right == 1) {
+  else if (mm.checkRight() == 1) {
     if (mm.getCurrentMenu()->getFuncStage() != 2) {
       mm.getCurrentMenu()->addFuncStage();
     }
   }
 }  
 
-void userInput() {
-  left = digitalRead(8);
-  right = digitalRead(9);
-  up = digitalRead(10);
-  down = digitalRead(11);
-
-  if (left == 1) {
-    haveInput = true;
-    if (!inFunction) {
-      mm.prevMenu();
-    }
-  }
-  else if (right == 1) {
-    haveInput = true;
-    if (!inFunction) {
-      mm.nextMenu();
-    }
-  }     
-  else if (up == 1){
-    haveInput = true;
-    if (!inFunction) {
-      mm.prevSelection();
-    }
-  }     
-  else if (down == 1) {
-    haveInput = true;
-    if (!inFunction) {
-      mm.nextSelection();
-    }
-  }
-}
-
-
-/*
-void userInput() {
-  if (left == 1) {
-    haveInput = true;
-    if (!inFunction) {
-      mm.prevMenu();
-    }
-    else if (inFunction) {
-      mm.getCurrentMenu()->executeFunction();
-    } 
-  }
-  else if (right == 1) {
-    haveInput = true;
-    if (!inFunction) {
-      mm.nextMenu();
-    }
-    else if (inFunction) {
-      mm.getCurrentMenu()->executeFunction();
-    }
-  }
-  
-  else if (up == 1){
-    haveInput = true;
-    if (!inFunction) {
-      mm.prevSelection();
-    }
-    else if (inFunction) {
-      mm.getCurrentMenu()->executeFunction();
-    }
-  }
-  else if (down == 1) {
-    haveInput = true;
-    if (!inFunction) {
-      mm.nextSelection();
-    }
-    else if (inFunction) {
-      mm.getCurrentMenu()->executeFunction();
-    }    
-  }
-}
-*/
-  
 /*
 //DESTRINCHAR ESSA FUNÇÃO EM VÁRIAS FUNÇÕES
 float testPerSe(int testNumber) {

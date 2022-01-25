@@ -1,6 +1,6 @@
 #include "MMClass.h"
+#include "Arduino.h"
 
-extern bool haveInput;
 extern bool inFunction;
 extern bool haveFunction;
 
@@ -16,6 +16,65 @@ extern bool haveFunction;
     mainMenu = currentMenu;
     currentSelection = currentMenu->nextSubMenu(currentSelecVecPos);
     lastSelection = currentSelection;
+  }
+
+  //função que recebe input do usuário
+  void MM::userInput() {
+    
+    left = digitalRead(8);
+    right = digitalRead(9);
+    up = digitalRead(10);
+    down = digitalRead(11);
+  
+    if (left == 1) {
+      haveInput = true;
+      if (!inFunction) {
+        prevMenu();
+      }
+    }
+    else if (right == 1) {
+      haveInput = true;
+      if (!inFunction) {
+        nextMenu();
+      }
+    }     
+    else if (up == 1){
+      haveInput = true;
+      if (!inFunction) {
+        prevSelection();
+      }
+    }     
+    else if (down == 1) {
+      haveInput = true;
+      if (!inFunction) {
+        nextSelection();
+      }
+    }
+  }
+
+  void MM::zeroInputs() {
+    left = 0;
+    right = 0;
+    up = 0;
+    down = 0;
+  }
+
+  bool MM::checkLeft() { return left; }
+
+  bool MM::checkRight() { return right; }
+
+  bool MM::checkUp() { return up; }
+
+  bool MM::checkDown() { return down; }
+  
+  //função que entrega atual valor de haveInput
+  bool MM::getHaveInput() {
+    return haveInput;
+  }
+
+  //função que define valor de haveInput
+  void MM::setHaveInput(bool haveInputStatus)  {
+    haveInput = haveInputStatus;
   }
 
   //função que coloca como seleção atual o próximo menu nas opções de submenu

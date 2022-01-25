@@ -16,8 +16,29 @@ class MM {
     int currentLine;
     int lastLine;
     String currentDisplay[4];
+    bool haveInput; //quando algum dos botóes da positivo, esse bool vai pra positivo, permitindo que uma nova impressão de menus seja feita, já com a atualização do input
+    bool left, right, up, down;
   public:
   MM(Menu* currentMenu);
+
+  //função que recebe input do usuário
+  void userInput();
+
+  void zeroInputs();
+  
+  bool checkLeft();
+
+  bool checkRight();
+
+  bool checkUp();
+
+  bool checkDown();
+
+//função que entrega atual valor de haveInput
+  bool getHaveInput();
+
+  //função que define valor de haveInput
+  void setHaveInput(bool haveInputStatus);
 
   //função que coloca como seleção atual o próximo menu nas opções de submenu
   void nextSelection();
