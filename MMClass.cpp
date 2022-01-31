@@ -1,8 +1,10 @@
 #include "MMClass.h"
+#include "MenuClass.h"
 #include "Arduino.h"
+//#include "FuncClass.h"
 
 extern bool inFunction;
-extern bool haveFunction;
+//extern bool haveFunction;
 
 //Classe que vai gerenciar o menu
 
@@ -25,28 +27,22 @@ extern bool haveFunction;
     right = digitalRead(9);
     up = digitalRead(10);
     down = digitalRead(11);
-  
-    if (left == 1) {
-      haveInput = true;
-      if (!inFunction) {
+
+    if (!inFunction) {
+      if (left == 1) {
+        haveInput = true;
         prevMenu();
       }
-    }
-    else if (right == 1) {
-      haveInput = true;
-      if (!inFunction) {
+      else if (right == 1) {
+        haveInput = true;
         nextMenu();
-      }
-    }     
-    else if (up == 1){
-      haveInput = true;
-      if (!inFunction) {
+      }     
+      else if (up == 1){
+        haveInput = true;
         prevSelection();
-      }
-    }     
-    else if (down == 1) {
-      haveInput = true;
-      if (!inFunction) {
+      }     
+      else if (down == 1) {
+        haveInput = true;
         nextSelection();
       }
     }
@@ -124,7 +120,7 @@ extern bool haveFunction;
     currentSelecVecPos = 0;
     }
     else if (currentSelection->getExistingFunct()){
-      currentSelection->executeFunction();
+      inFunction = true;
       currentMenu = currentSelection;
       lastLine = currentLine;
       lastSelecVecPos = currentSelecVecPos;
@@ -141,13 +137,13 @@ extern bool haveFunction;
         currentSelecVecPos = lastSelecVecPos;
         currentSelection = currentMenu->subMenuSelected(currentSelecVecPos);
       }
-      else {
+/*      else {
         currentMenu = currentMenu->getFatherMenu();
         inFunction = false;
         currentLine = lastLine;
         currentSelecVecPos = lastSelecVecPos;
         currentSelection = currentMenu->subMenuSelected(currentSelecVecPos);
-      }
+      }*/
     }
   }
 
@@ -158,13 +154,13 @@ extern bool haveFunction;
   }
   
   //função que organiza o array de submenus que serão impressos na tela
-  void MM::displayOrganizer(bool diffContent = false, String newContent[4] = 'c') {
+  void MM::displayOrganizer(bool diffContent = false, String* newContent = 'c') {
 //    clearDisplay();
     if (!diffContent) {
       int i = currentMenu->subMenuPosition(currentSelection);
       int j = i;
       for (j; j < i + 4; j++) {
-        if ( currentMenu->subMenuPosition(currentMenu->subMenuSelected(j-currentLine)) <= currentMenu->getSubMenuQty()) {
+        if (currentMenu->subMenuPosition(currentMenu->subMenuSelected(j-currentLine)) <= currentMenu->getSubMenuQty()) {
           currentDisplay[j-i] = currentMenu->subMenuSelected(j-currentLine)->getTitle();
         }
         else currentDisplay[j-i] = " ";

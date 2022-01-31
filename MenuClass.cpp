@@ -1,16 +1,25 @@
+//#include "MMClass.h"
 #include "MenuClass.h"
+#include "Arduino.h"
+//#include "FuncClass.h"
 
 extern bool inFunction;
-extern bool haveFunction;
+//extern bool haveFunction;
 
     Menu::Menu(const String title) 
       : title(title)
     {
       fatherMenu = this;
       haveFunction = false;
-      programCounter = 0;
-      funcStage = 0;
     }
+
+    Menu::Menu(const String title, Function* function)
+      : title(title), function(function)
+    {
+      fatherMenu = this;
+      haveFunction = true;      
+    }
+    
     //função que retorna o títlo para impressão na LCD
     String Menu::getTitle() {
       return title;
@@ -29,6 +38,7 @@ extern bool haveFunction;
         }  
       }
     }
+    
     //função que recebe um número e retorna o subMenu que se encontra naquela posição do vetor
     Menu* Menu::subMenuSelected(int i) {
       if (subMenus.getElement(i) != subMenus.back()) return subMenus.getElement(i);
@@ -67,37 +77,12 @@ extern bool haveFunction;
       return fatherMenu;
     }
 
+    Menu* Menu::getMenu() { return this; }
+
     bool Menu::getExistingFunct() {
       return haveFunction;
     }
-    /*
-    Function* getFunction() {
-      return function;
-    }*/
     
-    void Menu::executeFunction() {
-      if (haveFunction) {
-        inFunction = true;
-        (*func)();
-      }
+    Function* Menu::getFunction() {
+      return function;
     }
-    void Menu::addFunction(void (*function)()) {
-      func = function;
-      haveFunction = true;
-    }
-
-    Menu* Menu::getMenu() { return this; }
-
-    int Menu::getProgramCounter() { return programCounter; }
-
-    void Menu::addProgramCounter() { programCounter++; }
-
-    void Menu::setProgramCounter(int i) { programCounter = i; }
-
-    int Menu::getFuncStage() { return funcStage; }
-
-    void Menu::setFuncStage(int i) { funcStage = i; }
-
-    void Menu::addFuncStage() { funcStage++; }
-
-    void Menu::subFuncStage() { funcStage--; }

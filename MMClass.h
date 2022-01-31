@@ -2,7 +2,11 @@
 #define MENU_MANAGER_CLASS_H
 
 #include "Arduino.h"
-#include "MenuClass.h"
+//#include "MenuClass.h"
+//#include "FuncClass.h"
+
+class Function;
+class Menu;
 
 //Classe que vai gerenciar o menu
 class MM {
@@ -55,7 +59,7 @@ class MM {
   void clearDisplay();
   
   //função que organiza o array de submenus que serão impressos na tela
-  void displayOrganizer(bool diffContent = false, String newContent[4] = 'c');
+  void displayOrganizer(bool diffContent = false, String* newContent = 'c');
   
   //função que retorna um elemento do currentDisplay DEPOIS JUNTAR COM A displayOrganizer
   String getCurrentDisplay(int i);

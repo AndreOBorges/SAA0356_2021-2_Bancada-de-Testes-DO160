@@ -3,6 +3,10 @@
 
 #include "Arduino.h"
 #include "VectorClass.h"
+//#include "FuncClass.h"
+//#include "MMClass.h"
+
+class Function;
 
 //Classe Menu
 class Menu {
@@ -10,13 +14,12 @@ class Menu {
     String title; //o título que será impresso
     Vector<Menu*> subMenus; //vetor de menus filhos                         
     Menu* fatherMenu; //menu pai
-//    Function* function;
     bool haveFunction; //se o menu possui função, esse valor é verdadeiro e usado pelo MM para executar função
-    void (*func)();
-    int funcStage; //para funções de vários stages
-    int programCounter;
+    Function* function;
   public:
     Menu(const String title);
+
+    Menu(const String title, Function* function);
     
     //função que retorna o títlo para impressão na LCD
     String getTitle();
@@ -48,31 +51,11 @@ class Menu {
     //função que retorna o pai
     Menu* getFatherMenu();
 
-    bool getExistingFunct();
-    /*
-    Function* getFunction() {
-      return function;
-    }*/
-    
-    void executeFunction();
-
-    void addFunction(void (*function)());
-
     Menu* getMenu();
 
-    int getProgramCounter();
+    bool getExistingFunct();
 
-    void addProgramCounter();
-
-    void setProgramCounter(int i);
-
-    int getFuncStage();
-
-    void setFuncStage(int i);
-
-    void addFuncStage();
-
-    void subFuncStage();
+    Function* getFunction();
 };
 
 #endif //CLASS_MENU_H

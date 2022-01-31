@@ -1,107 +1,24 @@
 #include "MenuClass.h"
 #include "MMClass.h"
 #include "VectorClass.h"
+#include "FuncClass.h"
 #include <LiquidCrystal_I2C.h>
 #include <Wire.h>
 
 LiquidCrystal_I2C lcd(0x27, 20, 4);
 //bool left, right, up, down; //bool dos botões, quando recebe input ele vira 1
-bool printContent = false; //dentro das funções, o conteúdo apresentado vai ser diferente dos menus. Avaliar se não é o caso de usar inFunction ao invés de printContent
+//bool printContent = false; //dentro das funções, o conteúdo apresentado vai ser diferente dos menus. Avaliar se não é o caso de usar inFunction ao invés de printContent
 bool inFunction = false; //variável que vai para true assim que uma função começa a ser executada. É responsabilidade da função receber o input "left" e colocar o inFunction em false
 String specificContent[4]; //quando entra em uma função, o testo printado não são os menus, e por isso é necessário que a função preencha o que deve ser printado na tela
 
 void LCDPrint();
 //void userInput();
-//class Function;
 
-/*
-//classe função
-class Function {
-  private:
-    int funcStage; //para funções de vários stages
-    bool firstIteration; //bool que começa true e fica false a partir da primeira iteração
-    bool isTest; //talvez seja necessária essa bool, pra indicar que trata-se de um teste
-    String testNumber;
-    String testTitle;
-    String totalTime;
-    MM* menuManager;
-    
-  public:
-    Function(String testNumber, String testTitlele, String totalTime) 
-      :testNumber(testNumber), testTitlele(testTitlele), totalTime(totalTime)
-    {
-      isTest = true;
-      firstIteration = true;
-      funcStage = 0;
-    }
 
-    void funcManager() {
-      up = 0;
-      down = 0;
-      left = 0;     
-      right = 0;    
-      switch(funcStage) {
-        case 0:
-          stageZero();
-          break;
-        case 1:
-          stageOne();
-          break;
-        case 2:
-          stageTwo();
-          break;
-      }
-      
-      if (haveInput) {
-        LCDPrint();
-      }
-      
-      userInput();
-      
-      if (left == 1) {
-        if (funcStage == 0 || funcStage == 2) {
-          funcStage = 0;
-          menuManager->prevMenu();     
-          inFunction = false;
-          LCDPrint();
-        }
-        else {
-          funcStage--;
-        }
-      }
-      else if (right == 1) {
-        if (funcStage != 2) {
-          funcStage++;    
-        }
-      }
-    }
-    
-    void stageZero() {
-      specificContent[0] = "Test" + testNumber;
-      specificContent[1] = testTitle;
-      specificContent[2] = "Total time: " + totalTime;
-      specificContent[3] = "<-Back     To Test->";
-    }
-    
-    void stageOne() {
-      specificContent[0] = "Only emergency can ";
-      specificContent[1] = "stop the test. Click";
-      specificContent[2] = "   right to begin";
-      specificContent[3] = "<-Back       Begin->";      
-    }
-
-    void stageTwo() {
-      specificContent[0] = "T. " + testNumber + "in exec.";
-      specificContent[1] = "CVT:      CVM:      ";
-      specificContent[2] = "Progress(%): ";
-      specificContent[3] = " PRESS LEFT TO STOP";      
-    }
-};
-*/
 Menu mainMenu("Main menu");
 MM mm(&mainMenu); 
-Menu tests("Tests"), test1("16.6.1.1"), test2("16.6.1.2"), test3("16.6.1.3"), test4("16.6.1.4"), test5("16.6.1.5"), test6("16.6.2.1"), test7("16.6.2.2"), test8("16.6.2.3"), test9("16.6.2.4"), retData("Retrieve Data"),  info("Info"/*, infoDisplay*/);
-//Function testOne("16.6.1.1", "Voltage (avr value)", "91");
+Function testOne("16.6.1.1", "Voltage (avr value)", "91", &mm);
+Menu tests("Tests"), test1("16.6.1.1", &testOne), test2("16.6.1.2"), test3("16.6.1.3"), test4("16.6.1.4"), test5("16.6.1.5"), test6("16.6.2.1"), test7("16.6.2.2"), test8("16.6.2.3"), test9("16.6.2.4"), retData("Retrieve Data"),  info("Info"/*, infoDisplay*/);
 
 void setup() {
   mainMenu.addSubMenu(&tests);
@@ -116,14 +33,9 @@ void setup() {
   tests.addSubMenu(&test7);
   tests.addSubMenu(&test8);
   tests.addSubMenu(&test9);
-  info.addFunction(infoDisplay);
-  test2.addFunction(test16611);
-  
-  /*pciSetup(8);
-  pciSetup(9);
-  pciSetup(10);
-  pciSetup(11);*/
-  
+//  info.addFunction(infoDisplay);
+//  test2.addFunction(test16611);
+    
   lcd.init();// initialize the lcd 
   lcd.backlight();
   pinMode(8, INPUT);
@@ -136,20 +48,20 @@ void setup() {
 void loop() {
   if (!inFunction) {
     mm.userInput();  
-    if(mm.getHaveInput())
+    if(mm.getHaveInput() && !inFunction)
     {
       LCDPrint();
     }
   }
   else if (inFunction){
-    mm.getCurrentMenu()->executeFunction();
+    mm.getCurrentMenu()->getFunction()->funcManager();
   }
 }
 
 void LCDPrint() {
   if (!inFunction) {
     mm.displayOrganizer();  
-     lcd.clear();
+    lcd.clear();
     for (int i = 0; i < 4; i++) {
       if (i == mm.getCurrentLine()){
         lcd.setCursor(1, i);
@@ -175,7 +87,7 @@ void LCDPrint() {
   delay(500);
 }
 
-
+/*
 void infoDisplay() {
   
   if (mm.getCurrentMenu()->getProgramCounter() == 0) {
@@ -202,72 +114,7 @@ void infoDisplay() {
   }
   mm.userInput();
 }
-  
-
-void test16611() {
-  if (mm.getCurrentMenu()->getProgramCounter() == 0) {
-    mm.getCurrentMenu()->setFuncStage(0);
-      specificContent[0] = "Test 16.6.1.1";
-      specificContent[1] = "Voltage (avr value)";
-      specificContent[2] = "Total time: 91min";
-      specificContent[3] = "<-Back     To Test->";    
-  }
-
-  if(mm.getCurrentMenu()->getProgramCounter() != 0) {
-  switch(mm.getCurrentMenu()->getFuncStage()) {
-    case 0:
-      specificContent[0] = "Test 16.6.1.1";
-      specificContent[1] = "Voltage (avr value)";
-      specificContent[2] = "Total time: 91min";
-      specificContent[3] = "<-Back     To Test->";
-    break;
-
-    case 1:
-      specificContent[0] = "Only emergency can ";
-      specificContent[1] = "stop the test. Click";
-      specificContent[2] = "   right to begin";
-      specificContent[3] = "<-Back       Begin->";
-    break;
-    
-    case 2:
-      specificContent[0] = "T. 16.6.1.1 in exec.";
-      specificContent[1] = "CVT:      CVM:      ";
-      specificContent[2] = "Progress(%): ";
-      specificContent[3] = " PRESS LEFT TO STOP";
-  }
-  }
-  if (mm.getHaveInput()) {
-    LCDPrint();
-  }
-
-  if (mm.getCurrentMenu()->getProgramCounter() == 0) {
-    delay(500);
-    mm.getCurrentMenu()->addProgramCounter();
-    mm.getCurrentMenu()->setFuncStage(0);
-   
-    mm.zeroInputs();
-    }  
-    
-  mm.userInput();
-  
-  if (mm.checkLeft() == 1) {
-    if (mm.getCurrentMenu()->getFuncStage() == 0 /*|| mm.getCurrentMenu()->getFuncStage() == 2*/) {
-      mm.getCurrentMenu()->subFuncStage();
-      mm.getCurrentMenu()->setProgramCounter(0);      
-      mm.prevMenu();     
-      inFunction = false;
-      LCDPrint();
-    }
-    else {
-      mm.getCurrentMenu()->subFuncStage();
-    }
-  }
-  else if (mm.checkRight() == 1) {
-    if (mm.getCurrentMenu()->getFuncStage() != 2) {
-      mm.getCurrentMenu()->addFuncStage();
-    }
-  }
-}  
+*/
 
 /*
 //DESTRINCHAR ESSA FUNÇÃO EM VÁRIAS FUNÇÕES
@@ -381,24 +228,6 @@ float testPerSe(int testNumber) {
       onTest = false;
       break;
   }
-}
-
-*/
-
-/*
-void pciSetup(byte pin)
-{
-    *digitalPinToPCMSK(pin) |= bit (digitalPinToPCMSKbit(pin));  // enable pin
-    PCIFR  |= bit (digitalPinToPCICRbit(pin)); // clear any outstanding interrupt
-    PCICR  |= bit (digitalPinToPCICRbit(pin)); // enable interrupt for the group
-}
-
-ISR (PCINT0_vect) {
-    left = digitalRead(8);
-    right = digitalRead(9);
-    up = digitalRead(10);
-    down = digitalRead(11);
-    haveInput = true;
 }
 
 */
