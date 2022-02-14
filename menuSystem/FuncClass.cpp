@@ -98,18 +98,20 @@ void Function::stageTwo() {
   specificContent[2] = "Total time: " + totalTime;
   specificContent[3] = "<-Back     To Test->";
   LCDPrint();
-  /*specificContent[0] = "T. " + testNumber + "in exec.";
-  specificContent[1] = "CVT:      CVM:      ";
-  specificContent[2] = "Progress(%): ";
-  specificContent[3] = " PRESS EMER TO STOP";
-*/}
+}
 
 void testOneFunc()
 {
+
+  int percentage = 0;  
+  specificContent[0] = "T. 16.6.1.1 in exec.";
+  specificContent[1] = "CVT: " + String(output/53) + " CVM:      ";
+  specificContent[2] = "Progress(%): " + String(percentage) +"%";
+  specificContent[3] = " PRESS EMER TO STOP";
+
   emerButtonState = false;
-  int seconds = 0;
   unsigned long start = millis();
-  unsigned long oneSecCheck = millis();
+  unsigned long checkTime = millis(); //variável que permite checagens intervaladas
   int funcStage = 1;
   int lastFuncStage = 0;
   bool inTest = true;
@@ -118,38 +120,40 @@ void testOneFunc()
       lastFuncStage = funcStage;
       switch(funcStage) {
         case 1:
-          output = 0;
+          output = 73;
           break;
         case 2:
-          output = 255;
+          output = 75; //Considerando 255 = 4.92V, 75 é 1.5V, que é 30.3V/20 (30.3V é a primeira tensão do teste, e 20 o fator de multiplicação)
           break;
         case 3:
-          output = 127;
+          output = 73;
           break;
         case 4:
+          output = 57;
+          break;
+        case 5:
+          output = 47;
+          break;
+        case 6:
           output = 0;
           inTest = false;
           break;
       }
       analogWrite(6, output);
-      /*specificContent[0] = " ";
-      specificContent[1] = "Output voltage: " + String(output/51) + "V";
-      specificContent[2] = "  PWM voltage test";
-      specificContent[3] = "Duration: " + String(seconds) + "s";
-      LCDPrint();*/
+      specificContent[1] = "CVT: " + String(output/53) + " CVM:      ";
+      LCDPrint();
     }
-    if(millis() - start < 3000) funcStage = 1;
-    else if(millis() - start < 6000) funcStage = 2;
-    else if(millis() - start < 9000) funcStage = 3;
-    else if(millis() - start < 12000) funcStage = 4;
+    if(millis() - start < 1000) funcStage = 1;
+    else if(millis() - start < 4000) funcStage = 2;
+    else if(millis() - start < 10000) funcStage = 3;
+    else if(millis() - start < 13000) funcStage = 4;
+    else if(millis() - start < 16000) funcStage = 5;
+    else funcStage = 6;
 
-    if(millis() - oneSecCheck > 1000) {
-      seconds++;
-      oneSecCheck = millis();
-      specificContent[0] = " ";
-      specificContent[1] = "Output voltage: " + String(output/51) + "V";
-      specificContent[2] = "  PWM voltage test";
-      specificContent[3] = "Duration: " + String(seconds) + "s";
+    if(millis() - checkTime > 1600) {
+      percentage += 10;
+      checkTime = millis();
+      specificContent[2] = "Progress(%): " + String(percentage) +"%";
       LCDPrint();
     }
   }
