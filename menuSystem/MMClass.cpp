@@ -24,6 +24,11 @@ MM::MM(Menu* currentMenu)
   buttonPins[3] = 11;    
 }
 
+void MM::refresh() {
+  currentSelection = currentMenu->nextSubMenu(currentSelecVecPos);
+  currentSelection = currentMenu->prevSubMenu(currentSelecVecPos);
+}
+
 //função que recebe input do usuário
 void MM::userInput() {
   uint8_t i;

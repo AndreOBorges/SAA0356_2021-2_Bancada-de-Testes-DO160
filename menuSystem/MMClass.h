@@ -34,7 +34,8 @@ class MM {
     uint8_t testCount[noOfButtons];             //Test count, incremented once per button press
   public:
   MM(Menu* currentMenu);
-
+  
+  void refresh();
   //função que recebe input do usuário
   void userInput();
 

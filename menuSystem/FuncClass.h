@@ -4,6 +4,7 @@
 class MM;
 
 #include "Arduino.h"
+#include "VectorClass.h"
 //#include "MenuClass.h"
 //#include "MMClass.h"
 
