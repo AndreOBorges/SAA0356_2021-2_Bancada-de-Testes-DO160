@@ -2,8 +2,17 @@
 #include "MMClass.h"
 #include "VectorClass.h"
 #include "FuncClass.h"
+#include <SPI.h>
+#include <SD.h>
 #include <LiquidCrystal_I2C.h>
 #include <Wire.h>
+
+#define SS 53
+#define SPIMOSI 51
+#define SPIMISO 50
+#define SPISCK 52
+#define emergencyButton 2
+
 
 LiquidCrystal_I2C lcd(0x27, 20, 4);
 bool inFunction = false; //variável que vai para true assim que uma função começa a ser executada. É responsabilidade da função receber o input "left" e colocar o inFunction em false
@@ -16,7 +25,7 @@ String lastTest;
 
 void LCDPrint();
 void infoDisplay();
-
+void retrieveDataFunction();
 
 Menu mainMenu("Main menu");
 MM mm(&mainMenu); 
@@ -25,7 +34,10 @@ Function infoFunc(infoDisplay, "Info display", &mm);
 Function retrieveData(retrieveDataFunction, "Retrieve Data", &mm);
 Menu tests("Tests"), test1("16.6.1.1", &testOne), test2("16.6.1.2"), test3("16.6.1.3"), test4("16.6.1.4"), test5("16.6.1.5"), test6("16.6.2.1"), test7("16.6.2.2"), test8("16.6.2.3"), test9("16.6.2.4"), retData("Retrieve Data", &retrieveData),  info("Info", &infoFunc);
 
+File myFile;
+
 void setup() {
+  
   mainMenu.addSubMenu(&tests);
   mainMenu.addSubMenu(&retData);
   mainMenu.addSubMenu(&info);
@@ -42,14 +54,14 @@ void setup() {
   
   lcd.init();// initialize the lcd 
   lcd.backlight();
-  pinMode(2, INPUT_PULLUP);             //pino de interrupção
-  pinMode(6, OUTPUT);                   //pino de saída de tensão
-  pinMode(8, INPUT_PULLUP);
-  pinMode(9, INPUT_PULLUP);
-  pinMode(10, INPUT_PULLUP);
-  pinMode(11, INPUT_PULLUP);
+  pinMode(emergencyButton, INPUT_PULLUP);             //pino de interrupção
+  pinMode(PWMOutput, OUTPUT);                   //pino de saída de tensão
+  pinMode(leftButton, INPUT_PULLUP);
+  pinMode(rightButton, INPUT_PULLUP);
+  pinMode(upButton, INPUT_PULLUP);
+  pinMode(downButton, INPUT_PULLUP);
   LCDPrint();
-  attachInterrupt(digitalPinToInterrupt(2), emerButton, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(emergencyButton), emerButton, CHANGE);
 }
 
 void loop() {
@@ -97,7 +109,7 @@ void LCDPrint() {
 void emerButton()
 {
   output = 0;
-  analogWrite(6, output);
+  analogWrite(PWMOutput, output);
   emerButtonState = true;
 }
 
@@ -128,7 +140,7 @@ void retrieveDataFunction() {
   bool inRetrieve = false;
   bool retrieveSuccess = false;
   
-  if (infoFunc.getFirstIteration()) {
+  if (retrieveData.getFirstIteration()) {
     if(voltageReading.size() == 0){
       specificContent[0] = " No data available";
       specificContent[1] = "";
@@ -141,7 +153,7 @@ void retrieveDataFunction() {
       specificContent[2] = "";
       specificContent[3] = "<-Back    Retrieve->";     
     }
-    infoFunc.setFirstIteration(false);
+    retrieveData.setFirstIteration(false);
     LCDPrint();
   }
   mm.userInput();
@@ -149,42 +161,58 @@ void retrieveDataFunction() {
   if (mm.checkLeft() == 1) {
     mm.setHaveInput(true);
     inFunction = false;
-    infoFunc.setFirstIteration(true);
+    retrieveData.setFirstIteration(true);
     mm.prevMenu();     
     LCDPrint();
     }
     
   else if (mm.checkRight() == 1 && voltageReading.size() != 0) {
     mm.setHaveInput(true);
-    inRetrieve = true;
+    if(!SD.begin(SS)){
+      specificContent[0] = "SD connection failed";
+      specificContent[1] = "Check if SD card is";
+      specificContent[2] = "in position and try";
+      specificContent[3] = "        again";     
+      LCDPrint(); 
     }
+    else inRetrieve = true;
+  }
 
   while(inRetrieve) {
     int percentage;
-    float oneForthSize = voltageReading.size()/4f;
+    float oneForthSize = voltageReading.size()/4;
 
-    if(mm.getFirstIteration()) {
+    if(retrieveData.getFirstIteration()) {
       specificContent[0] = "Data being retrieved";
       specificContent[1] = "    Please wait";
       specificContent[2] = "";
-      specificContent[3] = "   Progress: " + String percentage + "%";
+      specificContent[3] = "   Progress: " + String(percentage) + "%";
     }
     
-    for(int i = 0; i < voltageReading.size(), i++){
+    for(int i = 0; i < voltageReading.size(); i++){
       int j;
-      PEGAR DADOS DE VOLT E TEMPO
+      
       j++;
       
       if (j > oneForthSize) {
         j = 0;
         percentage += 25;
-        specificContent[3] = "   Progress: " + String percentage + "%";     
-        LCDPrint()
+        specificContent[3] = "   Progress: " + String(percentage) + "%";     
+        LCDPrint();
       }
     }
     retrieveSuccess = true;
   }
   if (retrieveSuccess) {
-    
+      specificContent[0] = "   Data retrieved";
+      specificContent[1] = "    successfully";
+      specificContent[2] = "";
+      specificContent[3] = "Back to main menu...";
+      delay(1000);
+      mm.setHaveInput(true);
+      inFunction = false;
+      retrieveData.setFirstIteration(true);
+      mm.prevMenu();     
+      LCDPrint();
   }
 }

@@ -1,6 +1,8 @@
 #ifndef FUNCTION_CLASS_H
 #define FUNCTION_CLASS_H
 
+#define PWMOutput 8
+
 class MM;
 
 #include "Arduino.h"

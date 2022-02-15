@@ -1,6 +1,11 @@
 #ifndef MENU_MANAGER_CLASS_H
 #define MENU_MANAGER_CLASS_H
 
+#define leftButton 4
+#define upButton 5
+#define downButton 6
+#define rightButton 7
+
 #include "Arduino.h"
 
 #define noOfButtons 4     //Exactly what it says; must be the same as the number of elements in buttonPins

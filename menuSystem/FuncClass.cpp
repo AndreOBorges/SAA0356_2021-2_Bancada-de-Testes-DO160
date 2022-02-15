@@ -1,4 +1,4 @@
-  #include "Arduino.h"
+#include "Arduino.h"
 #include "FuncClass.h"
 #include "MMClass.h"
 
@@ -151,7 +151,7 @@ void testOneFunc()
           inTest = false;
           break;
       }
-      analogWrite(6, output);
+      analogWrite(PWMOutput, output);
       specificContent[1] = "CVT: " + String(output/53) + " CVM:      ";
       LCDPrint();
       //leitura pós mudança de tensão

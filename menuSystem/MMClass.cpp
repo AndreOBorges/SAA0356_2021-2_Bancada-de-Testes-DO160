@@ -18,10 +18,10 @@ MM::MM(Menu* currentMenu)
   mainMenu = currentMenu;
   currentSelection = currentMenu->nextSubMenu(currentSelecVecPos);
   lastSelection = currentSelection;
-  buttonPins[0] = 8;
-  buttonPins[1] = 9;
-  buttonPins[2] = 10;
-  buttonPins[3] = 11;    
+  buttonPins[0] = leftButton;
+  buttonPins[1] = rightButton;
+  buttonPins[2] = upButton;
+  buttonPins[3] = downButton;    
 }
 
 void MM::refresh() {
