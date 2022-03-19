@@ -62,6 +62,7 @@ void setup() {
   pinMode(downButton, INPUT_PULLUP);
   LCDPrint();
   attachInterrupt(digitalPinToInterrupt(emergencyButton), emerButton, CHANGE);
+  analogReference(INTERNAL2V56);
 }
 
 void loop() {
@@ -137,6 +138,7 @@ void infoDisplay() {
 
 
 void retrieveDataFunction() {
+  
   bool inRetrieve = false;
   bool retrieveSuccess = false;
   
@@ -167,6 +169,7 @@ void retrieveDataFunction() {
     }
     
   else if (mm.checkRight() == 1 && voltageReading.size() != 0) {
+    retrieveData.setFirstIteration(true);
     mm.setHaveInput(true);
     if(!SD.begin(SS)){
       specificContent[0] = "SD connection failed";
@@ -174,41 +177,82 @@ void retrieveDataFunction() {
       specificContent[2] = "in position and try";
       specificContent[3] = "        again";     
       LCDPrint(); 
+      delay(1000);
     }
     else inRetrieve = true;
   }
 
   while(inRetrieve) {
-    int percentage;
+    
+    int progress = 0;
+    
     float oneForthSize = voltageReading.size()/4;
-
+    
+    myFile = SD.open("test.csv", FILE_WRITE);
+    
     if(retrieveData.getFirstIteration()) {
       specificContent[0] = "Data being retrieved";
       specificContent[1] = "    Please wait";
-      specificContent[2] = "";
-      specificContent[3] = "   Progress: " + String(percentage) + "%";
+      specificContent[2] = "  Data points: " + String(voltageReading.size());
+      specificContent[3] = "   Progress: " + String(progress) + "%";
+      retrieveData.setFirstIteration(false);
     }
     
     for(int i = 0; i < voltageReading.size(); i++){
-      int j;
-      
+      float j;
       j++;
-      
-      if (j > oneForthSize) {
+      if (j > oneForthSize && myFile) {
         j = 0;
-        percentage += 25;
-        specificContent[3] = "   Progress: " + String(percentage) + "%";     
+        progress += 25;
+        specificContent[3] = "   Progress: " + String(progress) + "%";     
         LCDPrint();
+      }
+      if(myFile) {
+        myFile.print(voltageReading.getElement(i));
+        myFile.print(",");
+        myFile.println(timeReading.getElement(i));
       }
     }
     retrieveSuccess = true;
+    inRetrieve = false;
+    myFile.close();
+    delay(1000);
   }
+  
+  
   if (retrieveSuccess) {
-      specificContent[0] = "   Data retrieved";
-      specificContent[1] = "    successfully";
+      specificContent[0] = "";
+      specificContent[1] = "   Data retrieved";
+      specificContent[2] = "    successfully";
+      specificContent[3] = "";
+      LCDPrint();
+      
+      delay(2000);
+      
+      specificContent[0] = "   Cleaning memory";
+      specificContent[1] = "        ...";
+      specificContent[2] = "";
+      specificContent[3] = "";
+      LCDPrint();
+      
+      int currentSize;
+      currentSize = voltageReading.size();
+      
+      for(int i = 0; i < currentSize; i++){
+        voltageReading.pop();
+        timeReading.pop();
+      }
+      
+      delay(2000);
+
+      specificContent[0] = "   Memory clean";
+      specificContent[1] = "";
       specificContent[2] = "";
       specificContent[3] = "Back to main menu...";
-      delay(1000);
+      LCDPrint();
+
+      delay(2000);
+      
       mm.setHaveInput(true);
       inFunction = false;
       retrieveData.setFirstIteration(true);

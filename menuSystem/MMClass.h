@@ -1,10 +1,10 @@
 #ifndef MENU_MANAGER_CLASS_H
 #define MENU_MANAGER_CLASS_H
 
-#define leftButton 4
-#define upButton 5
-#define downButton 6
-#define rightButton 7
+#define leftButton 30
+#define rightButton 36
+#define upButton 32
+#define downButton 34
 
 #include "Arduino.h"
 

@@ -10,6 +10,7 @@ extern bool emerButtonState;
 extern Vector<float> voltageReading;
 extern Vector<unsigned long> timeReading;
 extern String lastTest;
+extern Function testOne;
 
 
 Function::Function(void (*function)(), String testNumber, String testTitle, String totalTime, MM* menuManager) 
@@ -109,7 +110,10 @@ void Function::stageTwo() {
 
 void testOneFunc()
 {
-
+  if (voltageReading.size() == 0) {
+    voltageReading.push_back(16611);
+    timeReading.push_back(16611);
+  }
   int percentage = 0;  
   specificContent[0] = "T. 16.6.1.1 in exec.";
   specificContent[1] = "CVT: " + String(output/53) + " CVM:      ";
